@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+      <title>Babylon Fun</title>
+
+      <style>
+        html, body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+    </style>
+
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://code.jquery.com/pep/0.4.1/pep.js"></script>
+
+
+
+   </head>
+
+   <body>
+
+    <canvas id="renderCanvas" touch-action="none"></canvas> //touch-action="none" for best results from PEP
+
+    <script>
+            var canvas = document.getElementById("renderCanvas"); // Get the canvas element 
+            var engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
+            var scene = new BABYLON.Scene(engine);
+
+            var CreateGround = function() {
+                const ground = BABYLON.MeshBuilder.CreateGround("ground", {width:10, height:10});
+                const groundMat = new BABYLON.StandardMaterial("groundMat");
+                groundMat.diffuseColor = new BABYLON.Color3(0, 1, 0);
+                ground.material = groundMat; 
+            };
+
+            var CreateNewSceneWithCamera = function() {
+                var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, 15 * Math.PI / 32, 25, BABYLON.Vector3.Zero(), scene);
+                camera.attachControl(canvas, true);
+                var hemiLight = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene);
+            };
+
+            var CreateHouse = function(){
+                const box = BABYLON.MeshBuilder.CreateBox("box", {width: 2, height: 1.5, depth: 3})
+                const roof = BABYLON.MeshBuilder.CreateCylinder("roof", {diameter: 3.9, height: 3, tessellation: 3})
+                box.position.y = 0.5;
+                box.rotation.y = BABYLON.Tools.ToRadians(45);
+
+                roof.rotation.y = BABYLON.Tools.ToRadians(45);
+                roof.scaling.x = 0.60;
+                roof.scaling.y = 0.8;
+                roof.rotation.z = Math.PI / 2;
+                roof.position.y = 1.75;
+
+                const roofMat = new BABYLON.StandardMaterial("roofMat");
+                roofMat.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/roof.jpg", scene);
+                const boxMat = new BABYLON.StandardMaterial("boxMat");
+                boxMat.diffuseTexture = new BABYLON.Texture("https://www.babylonjs-playground.com/textures/floor.png");
+
+                roof.material = roofMat;
+                box.material = boxMat;
+            };
+
+            var createScene = function () {
+                    CreateNewSceneWithCamera();
+                    CreateGround();
+                    CreateHouse();
+
+                    return scene;
+                };
+
+                var scene = createScene();
+
+            engine.runRenderLoop(function () { // Register a render loop to repeatedly render the scene
+                    scene.render();
+            });
+
+
+            window.addEventListener("resize", function () { // Watch for browser/canvas resize events
+                    engine.resize();
+            });
+    </script>
+
+   </body>
+
+</html>
