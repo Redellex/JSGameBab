@@ -17,18 +17,14 @@
         #renderCanvas {
             width: 100%;
             height: 100%;
-            touch-action: none;
+            touch-action: none; 
         }
     </style>
 
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <script src="https://code.jquery.com/pep/0.4.1/pep.js"></script>
-
-
-
    </head>
-
    <body>
 
     <canvas id="renderCanvas" touch-action="none"></canvas> //touch-action="none" for best results from PEP
@@ -39,7 +35,7 @@
             var scene = new BABYLON.Scene(engine);
 
             var CreateGround = function() {
-                const ground = BABYLON.MeshBuilder.CreateGround("ground", {width:10, height:10});
+                const ground = BABYLON.MeshBuilder.CreateGround("ground", {width:55, height:55});
                 const groundMat = new BABYLON.StandardMaterial("groundMat");
                 groundMat.diffuseColor = new BABYLON.Color3(0, 1, 0);
                 ground.material = groundMat; 
@@ -52,7 +48,13 @@
             };
 
             var CreateHouse = function(){
-                const box = BABYLON.MeshBuilder.CreateBox("box", {width: 2, height: 1.5, depth: 3})
+                faceUV = [];
+                faceUV[0] = new BABYLON.Vector4(0.5, 0.0, 0.75, 1.0); //rear face
+                faceUV[1] = new BABYLON.Vector4(0.0, 0.0, 0.25, 1.0); //front face
+                faceUV[2] = new BABYLON.Vector4(0.25, 0, 0.5, 1.0); //right side
+                faceUV[3] = new BABYLON.Vector4(0.75, 0, 1.0, 1); //left side
+
+                const box = BABYLON.MeshBuilder.CreateBox("box", {width: 2, height: 1.5, depth: 3, faceUV: faceUV, wrap: true})
                 const roof = BABYLON.MeshBuilder.CreateCylinder("roof", {diameter: 3.9, height: 3, tessellation: 3})
                 box.position.y = 0.5;
                 box.rotation.y = BABYLON.Tools.ToRadians(45);
@@ -66,16 +68,39 @@
                 const roofMat = new BABYLON.StandardMaterial("roofMat");
                 roofMat.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/roof.jpg", scene);
                 const boxMat = new BABYLON.StandardMaterial("boxMat");
-                boxMat.diffuseTexture = new BABYLON.Texture("https://www.babylonjs-playground.com/textures/floor.png");
+                boxMat.diffuseTexture = new BABYLON.Texture("https://doc.babylonjs.com/_next/image?url=%2Fimg%2Fgetstarted%2Fsemihouse.png&w=1920&q=75");
 
                 roof.material = roofMat;
                 box.material = boxMat;
+                return BABYLON.Mesh.MergeMeshes([box, roof],true, false, null, false, true)
+            };
+
+            var CreateMultipleHouses = function (house){
+                clonedHouse = house.clone("clonedHouse")
+                instanceHouse = house.createInstance("instanceHouse")
+
+                var places = [[0, 1, 5], [2,1,10], [0, 1, 15], [0, 1, 20], [0, 1, 25], [0, 15, 5], [0, 15, 10], [0, 15, 15]];
+                const houses = [];
+                for (let i = 0; i < places.length; i++) {
+                    if (places[i][0] === 1) {
+                        houses[i] = house.createInstance("house" + i);
+                    }
+                    else {
+                        houses[i] = house.createInstance("house" + i);
+                    }
+                    houses[i].rotation.y = places[i][0];
+                    houses[i].position.x = places[i][1];
+                    houses[i].position.z = places[i][2];
+
+                    
+                }
             };
 
             var createScene = function () {
                     CreateNewSceneWithCamera();
                     CreateGround();
-                    CreateHouse();
+                    house = CreateHouse();
+                    CreateMultipleHouses(house);
 
                     return scene;
                 };
