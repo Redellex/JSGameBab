@@ -19,6 +19,19 @@
             height: 100%;
             touch-action: none; 
         }
+
+        #holder {
+        width: 80%;
+        height: 100%;
+        float: left;
+        }
+
+        #instructions {
+        width: 20%;
+        height: 100%;
+        float: left;
+        background-color: grey;
+        }
     </style>
 
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
@@ -26,6 +39,18 @@
     <script src="https://code.jquery.com/pep/0.4.1/pep.js"></script>
    </head>
    <body>
+
+    <div id = "holder">
+        <canvas id="renderCanvas" touch-action="none"></canvas> 
+    </div>
+    <div id = "instructions">
+    <br/>
+        <h2>Instructions</h2>
+    <br/>
+        Instructions Instructions Instructions Instructions Instructions 
+        Instructions Instructions Instructions Instructions Instructions 
+    </div>
+
 
     <canvas id="renderCanvas" touch-action="none"></canvas> //touch-action="none" for best results from PEP
 
