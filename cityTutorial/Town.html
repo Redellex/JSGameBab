@@ -60,11 +60,115 @@
             var engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
             var scene = new BABYLON.Scene(engine);
 
+            var CreateStreetLights = function () {
+            const lampLight = new BABYLON.SpotLight("lampLight", BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, -1, 0), Math.PI, 1, scene);
+            lampLight.diffuse = BABYLON.Color3.Yellow();
+            const lampShape = [];
+            for(let i = 0; i < 20; i++) {
+                lampShape.push(new BABYLON.Vector3(Math.cos(i * Math.PI / 10), Math.sin(i * Math.PI / 10), 0));
+                }
+            lampShape.push(lampShape[0]); //close shape
+
+            const lampPath = [];
+            lampPath.push(new BABYLON.Vector3(0, 0, 0));
+            lampPath.push(new BABYLON.Vector3(0, 10, 0));
+            for(let i = 0; i < 20; i++) {
+                lampPath.push(new BABYLON.Vector3(1 + Math.cos(Math.PI - i * Math.PI / 40), 10 + Math.sin(Math.PI - i * Math.PI / 40), 0));
+            }
+            lampPath.push(new BABYLON.Vector3(3, 11, 0));
+
+            const lamp = BABYLON.MeshBuilder.ExtrudeShape("lamp", {cap: BABYLON.Mesh.CAP_END, shape: lampShape, path: lampPath, scale: 0.5});
+            lamp.position.y = 7
+            const light = new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0, 50, 0));
+            light.intensity = 0.5;
+            //material.maxSimultaneousLights = 15;
+
+            };
+
+            var CreateFountain = function () {
+                const fountainProfile = [
+                   new BABYLON.Vector3(0, 0, 0),
+                   new BABYLON.Vector3(10, 0, 0),
+                   new BABYLON.Vector3(10, 4, 0),
+                   new BABYLON.Vector3(8, 4, 0),
+                   new BABYLON.Vector3(8, 1, 0),
+                   new BABYLON.Vector3(1, 2, 0),
+                   new BABYLON.Vector3(1, 15, 0),
+                   new BABYLON.Vector3(3, 17, 0)
+                ];
+                const fountain = BABYLON.MeshBuilder.CreateLathe("fountain", {shape: fountainProfile, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
+                fountain.scaling.x = 0.05
+                fountain.scaling.y = 0.05
+                fountain.scaling.z = 0.05
+                fountain.position.x =7
+                fountain.position.z =15
+                const particleSystem = new BABYLON.ParticleSystem("particles", 5000, scene);
+                particleSystem.particleTexture = new BABYLON.Texture("https://i.imgur.com/hwuLHaa.png", scene);
+                particleSystem.emitter = new BABYLON.Vector3(7, 0.8, 15); // the point at the top of the fountain
+                particleSystem.minEmitBox = new BABYLON.Vector3(-0.01, 0, -0.01); // minimum box dimensions
+                particleSystem.maxEmitBox = new BABYLON.Vector3(0.01, 0, 0.01); // maximum box dimensions
+                particleSystem.color1 = new BABYLON.Color4(0.7, 0.8, 1.0, 1.0);
+                particleSystem.color2 = new BABYLON.Color4(0.2, 0.5, 1.0, 1.0);
+
+                particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+                particleSystem.minSize = 0.01;
+                particleSystem.maxSize = 0.05;
+
+                particleSystem.minLifeTime = 0.3;
+                particleSystem.maxLifeTime = 1.5;
+                particleSystem.emitRate = 1500;
+                particleSystem.direction1 = new BABYLON.Vector3(-1, 8, 1);
+                particleSystem.direction2 = new BABYLON.Vector3(1, 8, -1);
+
+                particleSystem.minEmitPower = 0.2;
+                particleSystem.maxEmitPower = 0.6;
+                particleSystem.updateSpeed = 0.01;
+                particleSystem.gravity = new BABYLON.Vector3(0, -9.81, 0);
+                particleSystem.start();
+
+            };
+
+            var CreateTreesSprites = function () {
+                const spriteManagerTrees = new BABYLON.SpriteManager("treesManager", "https://doc.babylonjs.com/_next/image?url=%2Fimg%2Fgetstarted%2Fpalmtree.png&w=1920&q=75", 2000, {width: 512, height: 1024}, scene);
+                for (let i = 0; i < 1000; i++) {
+                     const tree = new BABYLON.Sprite("tree", spriteManagerTrees);
+                     tree.position.x = Math.random() * (-40);
+                     tree.position.z = Math.random() * (-50) + 16;
+                     tree.position.y = 0.5;
+                }
+
+                for (let i = 0; i < 500; i++) {
+                    const tree = new BABYLON.Sprite("tree", spriteManagerTrees);
+                    tree.position.x = Math.random() * (25) + 7;
+                    tree.position.z = Math.random() * 35  + 8;
+                    tree.position.y = 0.5;
+                }
+            };
+
+            var CreateSkyBox = function() {
+                const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:150}, scene);
+                const skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+                skyboxMaterial.backFaceCulling = false;
+                skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("https://i.imgur.com/e2TevlP.png", scene);
+                skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+                skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+                skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+                skybox.material = skyboxMaterial;
+            };
+
             var CreateGround = function() {
                 const ground = BABYLON.MeshBuilder.CreateGround("ground", {width:55, height:55});
                 const groundMat = new BABYLON.StandardMaterial("groundMat");
                 groundMat.diffuseColor = new BABYLON.Color3(0, 1, 0);
                 ground.material = groundMat; 
+
+                const largeGroundMat = new BABYLON.StandardMaterial("largeGroundMat");
+                largeGroundMat.diffuseTexture = new BABYLON.Texture("https://i.imgur.com/aNVqW2t.jpeg");
+
+                const largeGround = BABYLON.MeshBuilder.CreateGroundFromHeightMap("largeGround", "https://doc.babylonjs.com/_next/image?url=%2Fimg%2Fgetstarted%2Fvillageheightmap.png&w=1920&q=75", 
+                {width:150, height:150, subdivisions: 20, minHeight:0, maxHeight: 4});
+                largeGround.material = largeGroundMat;
+                largeGround.position.y = 0.01;
             };
 
             var CreateNewSceneWithCamera = function() {
@@ -293,9 +397,13 @@
 
             var createScene = function () {
                     CreateNewSceneWithCamera();
+                    CreateSkyBox();
                     CreateGround();
+                    CreateTreesSprites();
                     house = CreateHouse();
                     CreateMultipleHouses(house);
+                    CreateStreetLights();
+                    CreateFountain();
                     CreateCar();
                     WheelAnimation();
                     CarAnimation();
